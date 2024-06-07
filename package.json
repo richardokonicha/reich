@@ -1,9 +1,12 @@
 {
   "name": "reich",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "easyapply": "ts-node source/easyapply.ts",
+    "example": "ts-node source/example.ts",
+    "climatebase": "ts-node source/climatebase.ts"
   },
   "keywords": [],
   "author": "",
@@ -11,6 +14,7 @@
   "description": "",
   "dependencies": {
     "playwright": "^1.44.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }
