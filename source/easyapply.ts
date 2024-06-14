@@ -1,41 +1,50 @@
-import { initializePlay, login, scrollJobList } from "./methods/utils";
+import { initializePlay, login, sanitizeHtml, scrollJobList } from "./methods/utils";
 import { config } from "./methods/config";
 import { Page } from "playwright";
-
+import { aiWrite } from "./methods/aiwrite";
 
 (async () => {
     try {
-        const page = await initializePlay();
+        const page: Page = await initializePlay();
         await login(page);
         await page.goto(config.linkedin.job);
+        
+        // Optionally, you can uncomment the following lines if you need to wait for the page to load completely or scroll the job list
         await page.waitForLoadState();
         await scrollJobList(page);
 
-        // After stopping scrolling, process the job cards
         const jobList = page.locator('div.jobs-search-results-list .job-card-container');
         const jobCount = await jobList.count();
-        jobList.first().scrollIntoViewIfNeeded();
+        // jobList.first().scrollIntoViewIfNeeded();
 
         // Loop through each job card and click on it
         for (let i = 0; i < jobCount; i++) {
             const jobCard = jobList.nth(i);
-            await jobCard.scrollIntoViewIfNeeded();
             await jobCard.click();
 
             // Interact with the Easy Apply and Dismiss buttons
             try {
-                await page.getByRole('button', { name: 'Easy Apply' }).click();
-                const easyModal = await page.locator('div [role="dialog"].jobs-easy-apply-modal').waitFor({state: "visible"});
-                // Do something with the Easy Apply modal here
+                const easyApplyButton = page.getByRole('button', { name: 'Easy Apply' });
+                if (await easyApplyButton.isVisible()) {
+                    await easyApplyButton.click();
+                    const easyModal = page.locator('div[role="dialog"].jobs-easy-apply-modal');
+                    // Do something with the Easy Apply modal here
+                    if (await easyModal.isVisible()) {
 
-                await page.getByRole('button', { name: 'Dismiss' }).click();
-            } catch (error) {
-                console.log(`Error clicking Easy Apply or Dismiss for job ${i}:`, error);
-            }
+                        while (await easyModal.locator("div.jobs-easy-apply-content progress").inputValue){
+                            console.log(await easyModal.locator("div.jobs-easy-apply-content progress").inputValue, "input value")
+                            await aiWrite("click the next button", easyModal);
+                        }
 
-            // Optionally, you can add a wait here if there are actions that need to complete before moving to the next item
-            // await page.waitForTimeout(1000); // Wait for 1 second
+
+                    }
+                    await easyModal.waitFor({ state: "hidden"});
+                }
+                } catch (error) {
+                console.error(`Error interacting with job card ${i}:`, error);
+                }
         }
+
 
         console.log("Done! Check Output");
 

@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "easyapply": "ts-node source/easyapply.ts",
     "example": "ts-node source/example.ts",
+    "test": "ts-node source/test.ts",
+    "call": "ts-node extras/calling.ts",
     "climatebase": "ts-node source/climatebase.ts"
   },
   "keywords": [],
@@ -13,8 +14,16 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "exceljs": "^4.4.0",
+    "openai": "^4.49.1",
     "playwright": "^1.44.1",
+    "sanitize-html": "^2.13.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.11.0",
+    "@zerostep/playwright": "^0.1.5",
+    "auto-playwright": "^1.15.0"
   }
 }

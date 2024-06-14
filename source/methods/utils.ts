@@ -1,6 +1,7 @@
 import path from 'path';
 import { contextOptions, browserArgs, config } from "./config";
 import { chromium, Page } from 'playwright';
+import sanitize from "sanitize-html";
 
 
 export async function run() {
@@ -55,7 +56,6 @@ export async function initializePlay() {
     return page;
 }
 
-
 export async function isElementInView(page: Page, locator: any) {
     const boundingBox = await locator.boundingBox();
     if (!boundingBox) return false;
@@ -87,3 +87,41 @@ export async function scrollJobList(page:Page) {
     await scrollContainer.scrollIntoViewIfNeeded();
     return;
 }
+
+export const sanitizeHtml = (subject: string): string => {
+    return sanitize(subject, {
+      allowedTags: sanitize.defaults.allowedTags.concat([
+        "button",
+        "form",
+        "img",
+        "input",
+        "select",
+        "textarea",
+        "option"
+      ]),
+      allowedAttributes: {
+        "*": [
+          "class",
+          "id",
+          "role",
+          "aria-label",
+          "aria-labelledby",
+          "aria-valuetext",
+          "aria-valuemin",
+          "aria-valuenow",
+          "aria-valuemax",
+          "tabindex",
+          "data-*",
+          "style",
+          "title",
+          "loading",
+          "alt"
+        ],
+        "img": ["src", "width", "height", "loading", "alt", "title"],
+        "input": ["type", "name", "value", "placeholder", "required"],
+        "select": ["id", "aria-describedby", "aria-required", "required", "data-test-text-entity-list-form-select"],
+        "option": ["value"]
+      }
+    });
+};
+
