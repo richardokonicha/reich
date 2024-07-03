@@ -91,7 +91,7 @@ export interface Details {
 
 export const config: Config = {
     dataPath: './data/user_data_dir',
-    openai: process.env.OPENAI_API_KEY || "sk-proj-kMxWNYiLzRcMB7IOiW22T3BlbkFJi81uTRKUT6WunTCxvMtH",
+    openai: process.env.OPENAI_API_KEY || "sk-proj-******",
     replit: {
         home: "https://replit.com/bounties?status=open&order=creationDateDescending",
         login: "https://replit.com/login",

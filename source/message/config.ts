@@ -135,7 +135,7 @@ export interface Details {
 
 export const config: Config = {
     dataPath: './data/user_data_dir',
-    openai: process.env.OPENAI_API_KEY || "sk-proj-kMxWNYiLzRcMB7IOiW22T3BlbkFJi81uTRKUT6WunTCxvMtH",
+    openai: process.env.OPENAI_API_KEY || "sk-proj-***",
     linkedin: {
         home: "https://www.linkedin.com/feed",
         login: "https://www.linkedin.com/login",
