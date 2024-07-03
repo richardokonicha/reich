@@ -1,21 +1,11 @@
 import path from 'path';
+import * as fs from 'fs';
+import * as XLSX from 'xlsx';
 import { contextOptions, browserArgs, config } from "./config";
 import { chromium, Page } from 'playwright';
 import sanitize from "sanitize-html";
 
-
-export async function run() {
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
-    const page = await context.newPage();
-  
-    await page.goto('https://example.com');
-    await page.screenshot({ path: 'example.png' });
-  
-    await browser.close();
-  }
-
-export async function login(page: Page) {
+export async function loginLinkedin(page: Page) {
     console.log("Login..")
     try {
         await page.goto(config.linkedin.home);
@@ -39,21 +29,20 @@ export async function login(page: Page) {
     }
 }
 
-export async function initializePlay() {
+export async function initializePlay(pathString: string) {
     console.log("Initializing...")
-    let context;
-    context = await chromium.launchPersistentContext(
-        path.resolve(config.dataPath), {
+    let browser;
+    browser = await chromium.launchPersistentContext(
+      path.resolve(pathString), {
         headless: false,
         args: browserArgs,
         ...contextOptions,
-        downloadsPath: path.resolve(config.dataPath),
+        downloadsPath: path.resolve(pathString),
         timeout: 10000,
         // slowMo: 100
-    });
-    const page = await context.newPage();
-    // await context.route('**.jpg', route => route.abort());
-    return page;
+      });
+    const page = await browser.newPage();
+    return { page, browser };
 }
 
 export async function isElementInView(page: Page, locator: any) {
@@ -69,7 +58,6 @@ export async function isElementInView(page: Page, locator: any) {
         boundingBox.x >= 0 &&
         boundingBox.x + boundingBox.width <= viewportWidth
     );
-
     return inView;
 }
 
@@ -125,3 +113,19 @@ export const sanitizeHtml = (subject: string): string => {
     });
 };
 
+export const getAllSkus = async (excelFile: string): Promise<string[]> => {
+    if (!fs.existsSync(excelFile)) {
+      return [];
+    }
+  
+    const workbook = XLSX.readFile(excelFile);
+    const worksheet = workbook.Sheets['Products'];
+  
+    if (!worksheet) {
+      throw new Error('Worksheet is undefined.');
+    }
+  
+    const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
+    return sheetData.slice(1).map(row => row[0]);
+  };
+  
