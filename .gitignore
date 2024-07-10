@@ -1,3 +1,5 @@
 node_modules/
 data/user_data_dir/
 .env
+data/
+data/
