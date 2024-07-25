@@ -2,6 +2,7 @@ import path from 'path';
 import OpenAI from 'openai';
 import { chromium, Page, Browser, BrowserContext } from 'playwright';
 import { contextOptions, browserArgs, config, promptFunc, systemPrompt } from './config';
+import fs from 'fs';
 
 const openai = new OpenAI();
 
@@ -88,4 +89,20 @@ export async function notify(message: string): Promise<void> {
     } catch (error) {
         console.error('Error sending notification:', error);
     }
+}
+
+const VISITED_LINKS_FILE = 'visited_links.json';
+
+export function getVisitedLinks(): Set<string> {
+    if (fs.existsSync(VISITED_LINKS_FILE)) {
+        const links = JSON.parse(fs.readFileSync(VISITED_LINKS_FILE, 'utf-8'));
+        return new Set(links);
+    }
+    return new Set();
+}
+
+export function saveVisitedLink(link: string): void {
+    const visitedLinks = getVisitedLinks();
+    visitedLinks.add(link);
+    fs.writeFileSync(VISITED_LINKS_FILE, JSON.stringify([...visitedLinks]));
 }
