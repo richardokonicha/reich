@@ -1,20 +1,13 @@
 import path from 'path';
 import OpenAI from 'openai';
-import { chromium,  Page } from 'playwright';
+import { chromium, Page, Browser, BrowserContext } from 'playwright';
 import { contextOptions, browserArgs, config, promptFunc, systemPrompt } from './config';
 
 const openai = new OpenAI();
 
-export async function initializePlay() {
+export async function initializePlay(): Promise<{ page: Page; browser: Browser | BrowserContext }> {
     console.log('Initializing...')
     try {
-        // const browser = await chromium.connect({
-        //     wsEndpoint: 'wss://browserless.fugoku.com/?token=BROWSERLESS_TOKEN',
-        //     // slowMo: 100,
-        //     // headless: false,
-        //     // args: browserArgs,
-        //     // ...contextOptions,
-        // });
         const browser = await chromium.launchPersistentContext(path.resolve(config.dataPath), {
             headless: false,
             args: browserArgs,
@@ -23,6 +16,7 @@ export async function initializePlay() {
             slowMo: 100,
         });
         const page = await browser.newPage();
+        await page.waitForLoadState();
         return { page, browser };
     } catch (error) {
         console.error('Error initializing Playwright:', error);
@@ -34,6 +28,7 @@ export async function loginCodementor(page: Page) {
     console.log('Login...');
     try {
         await page.goto(config.codementor.dashboard);
+        await page.waitForLoadState();
         if ( page.url().includes('login') ) {
             await page.goto(config.codementor.login);
             console.log('Login Page');
@@ -48,13 +43,10 @@ export async function loginCodementor(page: Page) {
     } catch (error) {
         console.error('Error during login:', error);
         return false;
-    } finally {
-        await page.goto(config.codementor.dashboard);
-        await page.waitForLoadState();
-    }
+    } 
 }
 
-export async function generateProposal(request: string) {
+export async function generateProposal(request: string): Promise<string> {
     console.log('Generating proposal...');
 
     try {
@@ -77,13 +69,23 @@ export async function generateProposal(request: string) {
     }
 }
 
-export async function notify(message: string) {
+export async function notify(message: string): Promise<void> {
     console.log(message);
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://ntfy.sh/suki", true);
-    xhr.setRequestHeader("Content-Type", "text/plain");
-    xhr.send(message + " 😀");
-    xhr.onerror = function () {
-        console.error('Error sending notification:', xhr.statusText);
-    };
+    try {
+        const response = await fetch("https://ntfy.sh/suki", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain",
+            },
+            body: message + " 😀",
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        console.log("Notification sent successfully");
+    } catch (error) {
+        console.error('Error sending notification:', error);
+    }
 }

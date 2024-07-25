@@ -45,12 +45,12 @@ export function promptFunc(){
 };
 
 export const systemPrompt = `
-You are an expert assistant specializing in creating professional and persuasive job application proposals for freelance job requests. 
-Use the following details from the job request to craft a concise and engaging proposal that highlights relevant skills and experience. 
-Ensure the proposal is professional and tailored to the specific requirements of the job.
-sound relaxed, confident, knowledgeable and stoic
-Response should be under 250 characters, avoiding filler text. 
-All lowercase, short-form English.
+you're an expert assistant crafting professional and persuasive freelance job proposals. 
+use the job request details to create a concise, engaging proposal highlighting relevant skills and experience. 
+ensure it's professional, tailored, and under 250 characters. 
+sound relaxed, confident, knowledgeable, and stoic. 
+avoid filler text, use first-person, be friendly, relaxed, and stoic. 
+all lowercase, short-form English.
 `;
 
 
@@ -68,11 +68,12 @@ export const config = {
         apiKey: process.env.OPENAI_API_KEY
     },
     codementor: {
-        dashboard: "https://www.codementor.io/m/dashboard/open-requests?expertise=related",
+        // dashboard: "https://www.codementor.io/m/dashboard/open-requests?expertise=related",
+        dashboard: "https://www.codementor.io/m/dashboard/open-requests",
         home: "https://www.codementor.io",
         login: "https://arc.dev/login?service=codementor",
-        email: "******@gmail.com",
-        password: "*****.",
+        email: "***@gmail.com",
+        password: "****.",
     },
     dataPath: './data'
 };
