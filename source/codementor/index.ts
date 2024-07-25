@@ -1,17 +1,15 @@
 import { Page, Browser, BrowserContext } from 'playwright';
 import { config } from './config';
-import { initializePlay, loginCodementor, generateProposal, notify } from './utils'
+import { initializePlay, loginCodementor, generateProposal, notify, getVisitedLinks, saveVisitedLink } from './utils'
 import path from 'path';
 
 import { chromium } from 'playwright';
 import { contextOptions, browserArgs, promptFunc, systemPrompt } from './config';
 
+
 async function codeMentor(): Promise<void> {
-    // let browser: Browser | BrowserContext | undefined;
-    // let page: Page | undefined;
     const browser = await chromium.launchPersistentContext(path.resolve(config.dataPath), {
         headless: false,
-        // args: browserArgs,
         args: [...browserArgs, '--disable-extensions'],
         ...contextOptions,
         timeout: 60000,
@@ -20,26 +18,14 @@ async function codeMentor(): Promise<void> {
     const page: Page = await browser.newPage();
 
     try {
-        // const { page, browser } = await initializePlay();
-        // await page.goto(config.codementor.dashboard);
-        // await page.waitForLoadState();
-        // await new Promise((resolve) => setTimeout(resolve, 6000));
-
         await page.goto(config.codementor.dashboard);
         await page.waitForLoadState();
 
-        if ( page.url().includes('login') ){
+        if (page.url().includes('login')) {
             const loginSuccess = await loginCodementor(page);
             await page.waitForLoadState();
             if (!loginSuccess) throw new Error('Login failed');
         }
-        
-
-        // const requestLinks = await page.$$eval(
-        //     "a.dashboard__open-question-item[href^='/m/dashboard/open-requests']",
-        //     (links) => links.map((link) => link.getAttribute('href'))
-        // );
-
 
         const linkElements = page.locator("a.dashboard__open-question-item[href^='/m/dashboard/open-requests']");
         const count = await linkElements.count();
@@ -50,29 +36,34 @@ async function codeMentor(): Promise<void> {
             if (href) requestLinks.push(href);
         }
 
-        // const pagel: Page = await browser.newPage();
+        const visitedLinks = getVisitedLinks();
 
         for (const link of requestLinks) {
-            // await new Promise((resolve) => setTimeout(resolve, 4000));
             if (!link) continue;
+            const linkurl = `${config.codementor.home}${link}`;
+
+            if (visitedLinks.has(linkurl)) {
+                console.log(`Link ${linkurl} has already been processed. Skipping.`);
+                continue;
+            }
+
             try {
-                const linkurl = `${config.codementor.home}${link}`;
+                // const linkurl = `${config.codementor.home}${link}`;
 
                 try {
                     await page.goto(linkurl);
                 } catch (error) {
                     console.error(`Attempt`, error);
-                    await page.waitForTimeout(3000);  // Wait 5 seconds before retry
+                    await page.waitForTimeout(3000);  // Wait 3 seconds before retry
                 }
 
-                // await pagel.goto(linkurl);
-        
                 const requesthead = await page.locator('div.question-detail h2').first().textContent().catch(() => 'N/A');
                 const request = await page.locator('div.question-detail__body').first().textContent().then(text => text?.trim() ?? 'N/A').catch(() => 'N/A');
                 const isApplied = await page.isVisible('img[src="https://web-cdn.codementor.io/static/images/Dashboard/Request/express-interest.png"]');
         
                 if (isApplied) {
                     console.log(`Already applied to request: ${requesthead}`);
+                    saveVisitedLink(linkurl);  // Save the link as visited
                     continue;
                 }
         
@@ -90,6 +81,7 @@ async function codeMentor(): Promise<void> {
                         throw new Error('Failed to submit proposal');
                     });
                     await notify(`Applied to request: ${request.slice(0, 50)}...${request.slice(-50)}`);
+                    saveVisitedLink(linkurl);  // Save the link as visited after successful submission
                 } else {
                     console.log('Submit button not found or request is empty.');
                 }
@@ -99,11 +91,10 @@ async function codeMentor(): Promise<void> {
                 continue;
             }
         }
+
     } catch (error) {
         console.error("Error during processing: ", error);
-    } 
-    
-    finally {
+    } finally {
         if (browser) {
             try {
                 await browser.close();
