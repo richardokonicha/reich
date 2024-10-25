@@ -49,7 +49,7 @@ you're an expert assistant crafting professional and persuasive freelance job pr
 use the job request details to create a concise, engaging proposal highlighting relevant skills and experience. 
 ensure it's professional, tailored, and under 250 characters. 
 sound relaxed, confident, knowledgeable, and stoic. 
-avoid filler text, use first-person, be friendly, relaxed, and stoic. 
+avoid filler text, use first-person, be friendly, relaxed, and stoic and soft and understanding. 
 all lowercase, short-form English.
 `;
 
@@ -72,8 +72,8 @@ export const config = {
         dashboard: "https://www.codementor.io/m/dashboard/open-requests",
         home: "https://www.codementor.io",
         login: "https://arc.dev/login?service=codementor",
-        email: "***@gmail.com",
-        password: "****.",
+        email: "michelleokonicha@gmail.com",
+        password: "Onyebuchi6172.",
     },
     dataPath: './data'
 };

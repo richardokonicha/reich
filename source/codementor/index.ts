@@ -108,6 +108,7 @@ async function codeMentor(): Promise<void> {
 (async () => {
     try {
         await codeMentor();
+        console.log('Done for now');
     } catch (error) {
         console.error("Error in main function: ", error);
     }
